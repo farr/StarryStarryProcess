@@ -1,56 +1,141 @@
 % Define document class
-\documentclass[twocolumn]{aastex631}
+\documentclass[modern]{aastex631}
 \usepackage{showyourwork}
 
 % Begin!
 \begin{document}
 
 % Title
-\title{An open source scientific article}
+\title{Notes on Lightcurve Marginalization}
 
 % Author list
-\author{@farr}
+\author[0000-0003-1540-8562]{Will M. Farr}
+\email{wfarr@flatironinstitute.org}
+\affiliation{Department of Physics and Astronomy, Stony Brook University, Stony Brook NY 11794, USA}
+\affiliation{Center for Computational Astrophysics, Flatiron Institute, New York NY 10010, USA}
 
 % Abstract with filler text
 \begin{abstract}
-    Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
-    Ut purus elit, vestibulum ut, placerat ac, adipiscing vitae, felis.
-    Curabitur dictum gravida mauris, consectetuer id, vulputate a, magna.
-    Donec vehicula augue eu neque, morbi tristique senectus et netus et.
-    Mauris ut leo, cras viverra metus rhoncus sem, nulla et lectus vestibulum.
-    Phasellus eu tellus sit amet tortor gravida placerat.
-    Integer sapien est, iaculis in, pretium quis, viverra ac, nunc.
-    Praesent eget sem vel leo ultrices bibendum.
-    Aenean faucibus, morbi dolor nulla, malesuada eu, pulvinar at, mollis ac.
-    Curabitur auctor semper nulla donec varius orci eget risus.
-    Duis nibh mi, congue eu, accumsan eleifend, sagittis quis, diam.
-    Duis eget orci sit amet orci dignissim rutrum.
+    I review the marginal likelihood for a STARRY/STARRY-process model and how
+    to draw max-likelihood surface map coefficients or sample from the map
+    posterior.
 \end{abstract}
 
 % Main body with filler text
-\section{Introduction}
-\label{sec:intro}
+\section{Formalism}
+\label{sec:formalism}
 
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
-Ut purus elit, vestibulum ut, placerat ac, adipiscing vitae, felis.
-Curabitur dictum gravida mauris, consectetuer id, vulputate a, magna.
-Donec vehicula augue eu neque, morbi tristique senectus et netus et.
-Mauris ut leo, cras viverra metus rhoncus sem, nulla et lectus vestibulum.
-Phasellus eu tellus sit amet tortor gravida placerat.
-Integer sapien est, iaculis in, pretium quis, viverra ac, nunc.
-Praesent eget sem vel leo ultrices bibendum.
-Aenean faucibus, morbi dolor nulla, malesuada eu, pulvinar at, mollis ac.
-Curabitur auctor semper nulla donec varius orci eget risus.
-Duis nibh mi, congue eu, accumsan eleifend, sagittis quis, diam.
-Duis eget orci sit amet orci dignissim rutrum.
+Starry \citep{Luger2019} and starry-process \citep{Luger2021b}.
 
-Nam dui ligula, fringilla a, euismod sodales, sollici- tudin vel, wisi.
-Morbi auctor lorem non justo, nam lacus libero, pretium at, lobortis vitae.
-Donec aliquet, tortor sed accumsan bibendum, erat ligula aliquet magna.
-Morbi ac orci et nisl hendrerit mollis, suspendisse ut massa, cras nec ante.
-Pellentesque a nulla cum sociis natoque penatibus et magnis dis parturient.
-Aliquam tincidunt urna, nulla ullamcorper vestibulum turpis.
-Pellentesque cursus luctus mauris \citep{Luger2021}.
+Definitions:
+\begin{itemize}
+    \item Let $d$ be the data vector of observed fluxes of dimension $N_d$.
+    \item Let $\Sigma_d$ be the $N_d \times N_d$ covariance matrix for the flux
+    measurements.  (Usually $\Sigma_d$ will be diagonal, with the squared
+    measurement uncertainties for each data point running down the diagonal.)
+    \item Let $y$ be the vector of spherical harmonic coefficients describing
+    the stellar surface map, of dimension $N_y$.
+    \item Let $A$ be the $N_d \times N_y$ design matrix produced by the STARRY
+    algorithm relating the map spherical harmonic coefficients to the predicted
+    lightcurve.
+    \item Let $\mu$ be the dimension $N_y$ mean vector of map spherical
+    harmonics described by the starry process.
+    \item Let $\Sigma_s$ be the dimension $N_y \times N_y$ covariance matrix for
+    the map spherical harmonics described by the starry process.
+\end{itemize}
+
+The terms in the joint log-likelihood for the data and the starry process that
+involve the spherical harmonic coefficients are 
+\begin{equation}
+    \log L = -\frac{1}{2} \left[ \left( d - A y \right)^T \Sigma_d^{-1} \left( d - A y \right) + \left( \mu - y \right)^T \Sigma_s^{-1} \left( \mu - y \right) \right].
+\end{equation}
+It should be clear that this log-likelihood is quadratic in $y$; we can
+``complete the square'' and re-write it in the form 
+\begin{equation}
+    \log L = \log L_0 - \frac{1}{2} \left( \nu - y \right)^T \Sigma^{-1} \left( \nu - y \right),
+\end{equation}
+where $\Sigma$ is given by 
+\begin{equation}
+    \Sigma^{-1} = A^T \Sigma_d^{-1} A + \Sigma_s^{-1},
+\end{equation}
+$\nu$ is the maximum likelihood map and is given by 
+\begin{equation}
+    \nu = \Sigma \left( A^T \Sigma_d^{-1} d + \Sigma_s^{-1} \mu \right),
+\end{equation}
+and 
+\begin{equation}
+    \log L_0 = \left. \log L \right|_{y = \nu}.
+\end{equation}
+
+If we wish to marginalize out the map coefficients $y$, we find 
+\begin{equation}
+    \log \bar{L} \equiv \log \int \mathrm{d} y \, e^{\log L} = \log L_0 + \frac{1}{2} \log \det \left( 2 \pi \Sigma \right).
+\end{equation}
+This marginal likelihood can be used to sample over the parameters of the starry
+process and the non-map parameters from starry that enter the design matrix,
+$A$, and therefore influence $\Sigma$ and $L_0$.
+
+For each sample of the non-map parameters, we can perform a draw from the
+conditional posterior over the map parameters by noting that the
+non-marginalized likelihood is Gaussian for $y$ with mean $\nu$ and covariance
+$\Sigma$.  So drawing 
+\begin{equation}
+    y \sim N\left( \nu, \Sigma \right)
+\end{equation}
+or, equivalently,
+\begin{equation}
+    y = \nu + S n,
+\end{equation}
+with 
+\begin{equation}
+    n \sim N(0, I)
+\end{equation}
+a $N_y$ vector of iid unit normal variables and letting $\Sigma = S S^T$ (i.e.\
+$S$ is the Cholesky factor of $\Sigma$, which has already been computed to
+efficiently implement the log-determinant term in the marginal likelihood).
+
+There's nothing new here; it's just algebra.  But note the organization of the
+calculation above: first $\Sigma$, then $\nu$, and then $\log L_0$, which will
+really simplify your life.  All these calculations are reproduced (in more
+generality) in \citet{Hogg2020}.
+
+Note that there are matrix multiplications with one dimension of $N_d$ in the
+computation, but there are no $N_d \times N_d$ multiplications.  Some
+implementation notes (in a perverted Einstein summation convention where
+repeated indices are summed, no matter how many times they appear):
+\begin{enumerate}
+    \item If the lightcurve observations have independent noise, then $\Sigma_d$
+    will be diagonal with entries $\sigma_k^2$, $k = 1, \ldots, N_d$, and it is
+    more efficient to exploit this using 
+    \begin{equation}
+        \left( A^T \Sigma_d^{-1} A \right)_{ij} = A_{ki} \frac{1}{\sigma_k^2} A_{kj},
+    \end{equation}
+    which involves $N_d \times N_y \times N_y$ computation and also 
+    \begin{equation}
+        (A^T \Sigma_d^{-1} d)_i = A_{ki} \frac{1}{\sigma_k^2} d_k,
+    \end{equation} 
+    which involves $N_y \times N_d$ computation.
+    \item Often we are given $\Sigma_s$ and not its inverse.  We wish to avoid
+    ever instantiating the components of the inverse matrix, which is a very
+    unstable operation (we will assume, as in the prior point, that $\Sigma_d$
+    is diagonal, so this worry does not apply to it).  We
+    can factor the expression for $\Sigma^{-1}$ to obtain 
+    \begin{equation}
+        \Sigma^{-1} = A^T \Sigma_d^{-1} A + \Sigma_s^{-1} = \Sigma_s^{-1} \left( \Sigma_s A^T \Sigma_d^{-1} A + I \right),
+    \end{equation}
+    whence 
+    \begin{equation}
+        \nu = \Sigma \left( A^T \Sigma_d^{-1} d + \Sigma_s^{-1} \mu \right) = \left( \Sigma_s A^T \Sigma_d^{-1} A + I \right)^{-1} \left( \Sigma_s A^T \Sigma_d^{-1} d + \mu \right).
+    \end{equation}
+    To compute $\log \det 2 \pi \Sigma$ we can use 
+    \begin{equation}
+        \log \det 2 \pi \Sigma = \log \det 2 \pi \Sigma_s - \log \det \left( \Sigma_s A^T \Sigma_d^{-1} A + I \right).
+    \end{equation}
+    (Note ``$-$'' arising from the inverse!)  Finally, we want to obtain the
+    Cholesky decomposition of $\Sigma$ in order to draw from the Gaussian
+    conditional posterior on the map $y$\ldots TODO.
+\end{enumerate}
+
 
 \bibliography{bib}
 
