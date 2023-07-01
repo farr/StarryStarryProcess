@@ -1,6 +1,6 @@
 {
-    "latex-workshop.latex.external.build.command": "showyourwork",
-    "latex-workshop.latex.external.build.args": [],
+    "latex-workshop.latex.external.build.command": "/bin/zsh",
+    "latex-workshop.latex.external.build.args": ["-c", "PATH=\"/Users/wfarr/miniconda3/envs/showyourwork/bin:/Users/wfarr/miniconda3/condabin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/TeX/texbin:/Applications/Privileges.app/Contents/Resources:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin\" python -m showyourwork build"],
     "latex-workshop.view.pdf.viewer": "tab",
     "latex-workshop.latex.outDir": "%WORKSPACE_FOLDER%"
 }
