@@ -3,7 +3,6 @@ channels:
   - defaults
 dependencies:
   - python=3.8
-  - mkl-service
   - pip
   - pip:
     - emcee
@@ -12,7 +11,7 @@ dependencies:
     - starry_process
     - lightkurve
     - corner
-    - arviz
+    - arviz ~= 0.14.0
     - jupyterlab
     - matplotlib
     - numpy 
