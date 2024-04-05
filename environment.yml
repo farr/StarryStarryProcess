@@ -2,20 +2,22 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - ffmpeg
+  - numpy>=1.19.2
+  - pip>=20.3.3
   - python=3.8
+  - scipy>=1.5.2
+  - setuptools>=51.3.3
+  - jupyterlab
+  - ipywidgets
+  - ffmpeg
   - pip
   - pip:
-    - emcee
-    - exoplanet
-    - starry
-    - starry_process
-    - lightkurve
-    - corner
-    - arviz ~= 0.14.0
-    - jupyterlab
-    - matplotlib
-    - numpy 
-    - scipy
-    - seaborn
-    - ipywidgets
+      - matplotlib
+      - exoplanet
+      - starry
+      - starry_process
+      - lightkurve
+      - arviz
+      - corner
+      - seaborn
+      - pandas
