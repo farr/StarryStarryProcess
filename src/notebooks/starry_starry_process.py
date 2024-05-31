@@ -179,4 +179,4 @@ class StarryStarryProcess(object):
 
         self._compute(t, flux, sigma_flux)
         nylm = self.a.shape[0]
-        return self.a[None,:] + tt.slinalg.solve_lower_triangular(self.AInv_chol, rng.normal(size=(nylm, size))).T
+        return self.a[None,:] + tt.slinalg.solve_upper_triangular(self.AInv_chol.T, rng.normal(size=(nylm, size))).T
